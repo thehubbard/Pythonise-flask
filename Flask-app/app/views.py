@@ -1,11 +1,73 @@
-from app import app
+from datetime import datetime
 
 from flask import render_template
+from app import app
+
+
+@app.template_filter("clean_date")
+def clean_date(dt):
+    return dt.strftime("%d %b %Y")
 
 
 @app.route("/")
 def index():
     return render_template("public/index.html")
+
+
+@app.route("/jinja")
+def jinja():
+    my_name = "Michael"
+    age = 29
+    langs = ["Python", "C++", "Bash", "Fortran", "SQL"]
+
+    friends = {"Bob": 28, "Callum": 27, "Daz": 42}
+
+    colours = ("Red", "Green", "BLue")
+
+    cool = True
+
+    class GitRemote:
+        def __init__(self, name, description, url) -> None:
+            self.name = name
+            self.description = description
+            self.url = url
+
+        def pull(self):
+            return f"Pulling repo {self.name}"
+
+        def clone(self):
+            return f"Cloning repo {self.url}"
+
+    my_remote = GitRemote(
+        name="Flask Jinja",
+        description="Template design tutorial",
+        url="https://github.com/thehubbard/jinja.git",
+    )
+
+    def repeat(x, qty):
+        return x * qty
+
+    date = datetime.utcnow()
+
+    my_html = "<h1>THIS IS SOME HTML</h1>"
+
+    suspicious = "<script>alert('YOU GOT HACKED!')</script>"
+
+    return render_template(
+        "public/jinja.html",
+        my_name=my_name,
+        age=age,
+        langs=langs,
+        friends=friends,
+        colours=colours,
+        cool=cool,
+        GitRemote=GitRemote,
+        my_remote=my_remote,
+        repeat=repeat,
+        date=date,
+        my_html=my_html,
+        suspicious=suspicious,
+    )
 
 
 @app.route("/about")
