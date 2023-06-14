@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, jsonify, make_response
 from app import app
 
 
@@ -123,3 +123,20 @@ def profile(username):
 @app.route("/profile/<foo>/<bar>/<baz>")
 def multi(foo, bar, baz):
     return f"foo is {foo}, bar is {bar}, baz is {baz}"
+
+
+@app.route("/json", methods=["POST"])
+def json():
+    if request.is_json:
+        req = request.get_json()
+
+        response = {"message": "JSON received!", "name": req.get("name")}
+
+        res = make_response(jsonify(response), 200)
+
+        return res
+
+    else:
+        res = make_response(jsonify({"message": "No JSON received!"}), 400)
+
+        return res
