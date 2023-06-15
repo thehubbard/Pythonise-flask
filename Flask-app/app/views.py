@@ -1,7 +1,15 @@
 from datetime import datetime
 import os
 
-from flask import render_template, request, redirect, jsonify, make_response
+from flask import (
+    render_template,
+    request,
+    redirect,
+    jsonify,
+    make_response,
+    send_from_directory,
+    abort,
+)
 from werkzeug.utils import secure_filename
 from app import app
 
@@ -224,3 +232,60 @@ def upload_image():
         return redirect(request.url)
 
     return render_template("public/upload_image.html")
+
+
+"""
+string: # DEFAULT
+int:
+float:
+path:
+uuid:
+"""
+
+app.config[
+    "CLIENT_IMAGES"
+] = f"{os.path.dirname(os.path.realpath(__file__))}/static/client/img"
+app.config[
+    "CLIENT_CSV"
+] = f"{os.path.dirname(os.path.realpath(__file__))}/static/client/csv"
+app.config[
+    "CLIENT_REPORTS"
+] = f"{os.path.dirname(os.path.realpath(__file__))}/static/client/reports"
+
+
+@app.route("/get-image/<string:image_name>")
+def get_image(image_name):
+    try:
+        return send_from_directory(
+            app.config["CLIENT_IMAGES"],
+            path=image_name,
+            as_attachment=True,
+        )
+    except FileNotFoundError:
+        abort(404)
+
+
+@app.route("/get-csv/<string:csv_name>")
+def get_csv(csv_name):
+    try:
+        return send_from_directory(
+            app.config["CLIENT_CSV"],
+            path=csv_name,
+            as_attachment=False,
+        )
+    except FileNotFoundError:
+        abort(404)
+
+
+@app.route("/get-report/<path:report_name>")
+def get_report(report_name):
+    print(app.config["CLIENT_REPORTS"])
+    print(report_name)
+    try:
+        return send_from_directory(
+            app.config["CLIENT_REPORTS"],
+            path=report_name,
+            as_attachment=False,
+        )
+    except FileNotFoundError:
+        abort(404)
