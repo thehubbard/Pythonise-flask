@@ -11,6 +11,8 @@ def clean_date(dt):
 
 @app.route("/")
 def index():
+    # FLASK_ENV has been removed in v2.3
+    print(app.config["DB_NAME"])
     return render_template("public/index.html")
 
 
@@ -22,7 +24,7 @@ def jinja():
 
     friends = {"Bob": 28, "Callum": 27, "Daz": 42}
 
-    colours = ("Red", "Green", "BLue")
+    colours = ("Red", "Green", "Blue")
 
     cool = True
 
