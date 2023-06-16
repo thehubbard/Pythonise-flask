@@ -2,6 +2,7 @@ from datetime import datetime
 import os
 
 from flask import (
+    flash,
     render_template,
     request,
     redirect,
@@ -98,8 +99,13 @@ def sign_up():
         email = req.get("email")
         password = request.form["password"]
 
-        print(username, email, password)
+        if not len(password) >= 10:
+            flash(
+                "Password must be at least 10 characters in length", "warning"
+            )
+            return redirect(request.url)
 
+        flash("Account created!", "success")
         return redirect(request.url)
 
     return render_template("public/sign_up.html")
