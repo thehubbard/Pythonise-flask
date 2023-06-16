@@ -9,6 +9,8 @@ from flask import (
     make_response,
     send_from_directory,
     abort,
+    session,
+    url_for,
 )
 from werkzeug.utils import secure_filename
 from app import app
@@ -317,3 +319,66 @@ def cookies():
     res.set_cookie("chewy", "yes")
 
     return res
+
+
+# import secrets
+# secrets.token_urlsafe(16)
+app.config["SECRET_KEY"] = "wR_UAqhsWrgX5jXGwZLJmw"
+
+users_db = {
+    "michael": {
+        "username": "michael",
+        "email": "michael@example.com",
+        "password": "example",
+        "bio": "no one",
+    },
+    "andy": {
+        "username": "andy",
+        "email": "andy@example.com",
+        "password": "april9",
+        "bio": "Mouse rat member",
+    },
+}
+
+
+@app.route("/sign-in", methods=["POST", "GET"])
+def sign_in():
+    if request.method == "POST":
+        req = request.form
+
+        username = req["username"]
+        password = req["password"]
+
+        if username not in users_db:
+            print("Username not found")
+            return redirect(request.url)
+        else:
+            user = users_db[username]
+
+        if password != user["password"]:
+            print("Incorrect password")
+            return redirect(request.url)
+        else:
+            # DO NOT DO IN PRODUCT USE A UUID INSTEAD
+            session["USERNAME"] = user["username"]
+            print("session username set")
+            return redirect(url_for("profile_si"))
+
+    return render_template("public/sign_in.html")
+
+
+@app.route("/profile-sign-in")
+def profile_si():
+    if session.get("USERNAME") is not None:
+        username = session.get("USERNAME")
+        user = users_db[username]
+        return render_template("public/profile-sign-in.html", user=user)
+    else:
+        print("No username found in session")
+        return redirect(url_for("sign_in"))
+
+
+@app.route("/sign-out")
+def sign_out():
+    session.pop("USERNAME", None)
+    return redirect(url_for("sign_in"))

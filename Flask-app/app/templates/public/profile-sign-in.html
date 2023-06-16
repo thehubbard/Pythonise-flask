@@ -2,6 +2,12 @@
 
 {% block title %}Profile{% endblock %}
 
+{% block navrhs %}
+<li class="nav-item">
+  <a class="nav-link" href="/sign-out">Sign out</a>
+</li>
+{% endblock %}
+
 {% block main %}
 
 <div class="container">
@@ -12,15 +18,10 @@
 
       <div class="card">
         <div class="card-body">
-          <h4>{{ username }}</h4>
+          <h4>{{ user["username"] }}</h4>
           <hr>
-          {% if user %}
-          <p><strong>{{ user["name"] }}</strong></p>
+          <p>{{ user["email"] }}</p>
           <p class="text-muted">{{ user["bio"] }}</p>
-          <p><em>{{ user["twitter_handle"] }}</em></p>
-          {% else %}
-          <p>User not found</p>
-          {% endif %}
         </div>
       </div>
 
