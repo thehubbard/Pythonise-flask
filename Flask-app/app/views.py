@@ -388,3 +388,217 @@ def profile_si():
 def sign_out():
     session.pop("USERNAME", None)
     return redirect(url_for("sign_in"))
+
+
+# HTTP methods
+
+stock = {"fruit": {"apple": 30, "banana": 45, "cherry": 1000}}
+
+
+# GET
+@app.route("/get-text")
+def get_text():
+    return "Some text"
+
+
+# render_template pattern e.g. index is also get
+
+
+@app.route("/qs")
+def qs():
+    if request.args:
+        req = request.args
+        return " ".join(f"{k}: {v} " for k, v in req.items())
+    return "No query"
+
+
+@app.route("/stock")
+def get_stock():
+    res = make_response(jsonify(stock), 200)
+
+    return res
+
+
+@app.route("/stock/<collection>")
+def get_collection(collection):
+    """Returns collection from stock"""
+    if collection in stock:
+        res = make_response(jsonify(stock[collection]), 200)
+    else:
+        res = make_response(jsonify({"error": "Collection not found"}), 400)
+
+    return res
+
+
+@app.route("/stock/<collection>/<member>")
+def get_member(collection, member):
+    """Returns the qty of the member"""
+
+    if collection in stock:
+        member = stock[collection].get(member)
+        if member:
+            res = make_response(jsonify(member), 200)
+        else:
+            res = make_response(jsonify({"error": "Unknown member"}), 400)
+    else:
+        res = make_response(jsonify({"error": "Collection not found"}), 400)
+
+    return res
+
+
+@app.route("/add-collection", methods=["GET", "POST"])
+def add_collection():
+    """
+    Renders a template if request method is GET.
+    Creates a collection if request method is POST
+    and if collection doesn't exist
+    """
+
+    if request.method == "POST":
+        req = request.form
+
+        collection = req.get("collection")
+        member = req.get("member")
+        qty = req.get("qty")
+
+        if collection in stock:
+            message = "Collection already exists"
+            return render_template(
+                "public/add_collection.html", stock=stock, message=message
+            )
+
+        stock[collection] = {member: qty}
+        message = "Collection created"
+
+        return render_template(
+            "public/add_collection.html", stock=stock, message=message
+        )
+
+    return render_template("public/add_collection.html", stock=stock)
+
+
+# POST - Create a collection
+@app.route("/stock/<collection>", methods=["POST"])
+def create_collection(collection):
+    """Creates a new collection if it doesn't exist"""
+
+    req = request.get_json()
+
+    if collection in stock:
+        res = make_response(
+            jsonify({"error": "Collection already exists"}), 400
+        )
+        return res
+
+    stock.update({collection: req})
+
+    res = make_response(jsonify({"message": "Collection created"}), 200)
+
+    return res
+
+
+# PUT - Put a collection
+@app.route("/stock/<collection>", methods=["PUT"])
+def put_collection(collection):
+    """
+    Replaces or creates a collection. Expected body: {"member" :qty}
+    Overwrites
+    """
+
+    req = request.get_json()
+
+    stock[collection] = req
+
+    res = make_response(jsonify({"message": "Collection replaced"}), 200)
+
+    return res
+
+
+# PATCH - Patch a collection
+@app.route("/stock/<collection>", methods=["PATCH"])
+def patch_collection(collection):
+    """
+    Updates or creates a collection. Expected body: {"member" :qty}
+
+    """
+
+    req = request.get_json()
+
+    if collection in stock:
+        for k, v in req.items():
+            stock[collection][k] = v
+
+        res = make_response(jsonify({"message": "Collection updated"}), 200)
+        return res
+
+    stock[collection] = req
+
+    res = make_response(jsonify({"message": "Collection created"}), 200)
+
+    return res
+
+
+# PATCH - Patch a member
+@app.route("/stock/<collection>/<member>", methods=["PATCH"])
+def patch_member(collection, member):
+    """
+    Updates or creates a collection member. Expected body: {"qty" :value}
+
+    """
+
+    req = request.get_json()
+
+    if collection in stock:
+        for k, v in req.items():
+            if member in stock[collection]:
+                stock[collection][member] = v
+
+                res = make_response(
+                    jsonify({"message": "Collection member updated"}), 200
+                )
+                return res
+
+            stock[collection][member] = v
+            res = make_response(
+                jsonify({"message": "Collection member created"}), 200
+            )
+            return res
+
+    res = make_response(jsonify({"message": "Collection not found"}), 400)
+    return res
+
+
+# DELETE - Deletes a collection
+@app.route("/stock/<collection>", methods=["DELETE"])
+def delete_collection(collection):
+    """
+    If collection exists, delete it
+    """
+    if collection in stock:
+        del stock[collection]
+        res = make_response(jsonify({}), 204)  # action enacted
+        return res
+
+    res = make_response(jsonify({"message": "Collection not found"}), 400)
+
+    return res
+
+
+# DELETE - Patch a member
+@app.route("/stock/<collection>/<member>", methods=["DELETE"])
+def delete_member(collection, member):
+    """
+    If collection exists and the member exists, delete it
+
+    """
+
+    if collection in stock:
+        if member in stock[collection]:
+            del stock[collection][member]
+            res = make_response(jsonify({}), 204)  # action enacted
+            return res
+        res = make_response(jsonify({"message": "Member not found"}), 400)
+        return res
+
+    res = make_response(jsonify({"message": "Collection not found"}), 400)
+    return res

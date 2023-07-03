@@ -1,0 +1,57 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}Add collection{% endblock %}
+
+{% block main %}
+
+<div class="container mt-3">
+  <div class="row">
+    <div class="col-sm-6 offset-sm-3">
+      <div class="card mb-3 p-3">
+        <h5 class="card-title">Add collection to stock</h5>
+        <hr>
+        <form action="/add-collection" method="POST">
+          <div class="form-group">
+            <label>Collection</label>
+            <input type="text" class="form-control" name="collection">
+          </div>
+          <div class="form-group">
+            <label>Member</label>
+            <input type="text" class="form-control" name="member">
+          </div>
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" class="form-control" name="qty">
+          </div>
+          <button type="submit" class="btn btn-primary">Add collection</button>
+        </form>
+      </div>
+    </div>
+    <div class="col-sm-6 offset-sm-3">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Stock</h5>
+          <hr>
+          {% for k, v in stock.items() %}
+          <h6>{{ k }}</h6>
+          <ul>
+            {% for x, y in v.items() %}
+            <li>{{x}}: {{y}}</li>
+            {% endfor %}
+          </ul>
+          {% endfor %}
+        </div>
+      </div>
+      {% if message %}
+      <div class="alert alert-primary alert-dismissible fade show" rolw="alert">
+        {{ message }}
+        <button type="button">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
