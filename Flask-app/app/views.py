@@ -602,3 +602,53 @@ def delete_member(collection, member):
 
     res = make_response(jsonify({"message": "Collection not found"}), 400)
     return res
+
+
+# TUTORIAL 20. Request object
+@app.route("/the/request/object")
+def public_index():
+    # print(request.__dict__.items()) # All options
+    # print(request.method)
+    # print(request.cookies) # Returns immutable object
+    # print(request.json)  # Different options available for json data check docs
+    # print(request.files) # Returns immutable object
+    print(request.headers)
+
+    return render_template("public/index.html")
+
+
+@app.route("/view/args/<foo>/<bar>")
+def view_arguments(foo, bar):
+    """Handles arguments coming in from the URL"""
+
+    # request.view_args  returns a dict of any arguments passed to the view
+    view_args = request.view_args
+    print(view_args)
+
+    return render_template("public/index.html")
+
+
+@app.route("/url/info")
+def url_info():
+    host = request.host
+    print(f"host: {host}")
+
+    host_url = request.host_url
+    print(f"host_url: {host_url}")
+
+    path = request.path
+    print(f"path: {path}")
+
+    full_path = request.full_path
+    print(f"full_path: {path}")
+
+    url = request.url
+    print(f"url: {url}")
+
+    base_url = request.base_url
+    print(f"base_url: {base_url}")
+
+    url_root = request.url_root
+    print(f"url_root: {url_root}")
+
+    return render_template("public/index.html")
